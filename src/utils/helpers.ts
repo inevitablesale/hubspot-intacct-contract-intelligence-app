@@ -34,7 +34,7 @@ export function parseDate(dateStr: string | Date): Date {
   }
   const date = new Date(dateStr);
   if (isNaN(date.getTime())) {
-    throw new Error(`Invalid date: ${dateStr}`);
+    throw new Error(`Failed to parse date string: '${dateStr}'. Expected a valid date format.`);
   }
   return date;
 }

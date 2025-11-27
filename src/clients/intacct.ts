@@ -370,6 +370,13 @@ export class IntacctClient {
     
     for (const match of subMatches) {
       const subXml = match[1];
+      
+      // Parse usage values with explicit null checking to handle 0 values correctly
+      const usageAmountStr = this.extractXmlValue(subXml, 'USAGEAMOUNT');
+      const usageLimitStr = this.extractXmlValue(subXml, 'USAGELIMIT');
+      const usageAmount = usageAmountStr !== null ? parseFloat(usageAmountStr) : undefined;
+      const usageLimit = usageLimitStr !== null ? parseFloat(usageLimitStr) : undefined;
+      
       subscriptions.push({
         id: this.extractXmlValue(subXml, 'RECORDNO') || '',
         contractId: this.extractXmlValue(subXml, 'CONTRACTID') || '',
@@ -379,8 +386,8 @@ export class IntacctClient {
         quantity: parseFloat(this.extractXmlValue(subXml, 'QUANTITY') || '1'),
         unitPrice: parseFloat(this.extractXmlValue(subXml, 'PRICE') || '0'),
         totalPrice: parseFloat(this.extractXmlValue(subXml, 'TOTAL') || '0'),
-        usageAmount: parseFloat(this.extractXmlValue(subXml, 'USAGEAMOUNT') || '0') || undefined,
-        usageLimit: parseFloat(this.extractXmlValue(subXml, 'USAGELIMIT') || '0') || undefined,
+        usageAmount: !isNaN(usageAmount as number) ? usageAmount : undefined,
+        usageLimit: !isNaN(usageLimit as number) ? usageLimit : undefined,
         startDate: new Date(this.extractXmlValue(subXml, 'BEGINDATE') || ''),
         endDate: new Date(this.extractXmlValue(subXml, 'ENDDATE') || ''),
         status: this.mapSubscriptionStatus(this.extractXmlValue(subXml, 'STATUS') || ''),

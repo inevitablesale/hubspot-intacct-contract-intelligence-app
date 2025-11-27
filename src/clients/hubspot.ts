@@ -354,19 +354,30 @@ export class HubSpotClient {
     try {
       for (const templateConfig of templateConfigs) {
         try {
-          // @ts-expect-error Timeline templates API structure
-          const result = await this.client.crm.timeline.templatesApi.create(config.hubspot.appId, {
+          // Timeline templates API requires specific HubSpot app configuration
+          // This is a best-effort approach that may not work until app is registered
+          const createParams = {
             name: templateConfig.name,
             headerTemplate: templateConfig.headerTemplate,
             detailTemplate: templateConfig.detailTemplate,
             objectType: templateConfig.objectType,
-          });
+          };
+          const appIdNum = parseInt(config.hubspot.appId, 10);
+          if (isNaN(appIdNum)) {
+            logger.warn('Invalid HubSpot app ID - skipping template creation');
+            continue;
+          }
+          const result = await this.client.crm.timeline.templatesApi.create(
+            appIdNum, 
+            createParams as Parameters<typeof this.client.crm.timeline.templatesApi.create>[1]
+          );
           templates[templateConfig.name] = result.id;
           logger.info('Timeline template created', { name: templateConfig.name, id: result.id });
         } catch (error: unknown) {
-          // Template might already exist
-          if ((error as { code?: number }).code !== 409) {
-            throw error;
+          // Template might already exist (409) or app not registered yet
+          const err = error as { code?: number; status?: number };
+          if (err.code !== 409 && err.status !== 409) {
+            logger.warn('Failed to create timeline template', { name: templateConfig.name, error });
           }
         }
       }

@@ -100,7 +100,7 @@ describe('Helper Utilities', () => {
     });
 
     it('should throw error for invalid date', () => {
-      expect(() => parseDate('invalid-date')).toThrow('Invalid date');
+      expect(() => parseDate('invalid-date')).toThrow('Failed to parse date string');
     });
   });
 

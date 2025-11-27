@@ -68,7 +68,8 @@ export class UnderbillingDetector {
       if (
         subscription.usageAmount !== undefined &&
         subscription.usageLimit !== undefined &&
-        subscription.usageAmount > subscription.usageLimit
+        subscription.usageAmount > subscription.usageLimit &&
+        subscription.quantity > 0 // Guard against division by zero
       ) {
         const overage = subscription.usageAmount - subscription.usageLimit;
         const estimatedOverageValue = overage * (subscription.unitPrice / subscription.quantity);
